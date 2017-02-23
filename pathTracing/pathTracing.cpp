@@ -7,7 +7,6 @@
 
 #include <GLFW/glfw3.h>
 
-
 #include "oglShader.h"
 #include "oglTexture.h"
 #include "oglModel.h"
@@ -21,10 +20,10 @@ const GLuint WIDTH = 512, HEIGHT = 512;
 bool keys[1024];
 
 GLfloat camPosition[3] = { 0,0,5 };
-GLfloat camForward[4] = { 0,0,-0.005,0 };
-GLfloat camBack[4] = { 0,0,0.005 };
-GLfloat camLeft[4] = { -0.005,0,0 };
-GLfloat camRight[4] = { 0.005,0,0 };
+GLfloat camForward[4]  = { 0,0,-0.005,0 };
+GLfloat camBack[4]     = { 0,0,0.005 };
+GLfloat camLeft[4]     = { -0.005,0,0 };
+GLfloat camRight[4]    = { 0.005,0,0 };
 
 const GLfloat camForwardC[4] = { 0,0,-0.1,0 };
 const GLfloat camBackC[4]    = { 0,0,0.1 };
@@ -38,6 +37,8 @@ bool firstMouse = true;
 GLfloat lastX, lastY;
 
 GLfloat pvmMatrix[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+
+int timeNum = 0;
 
 void getFPS()
 {
@@ -59,36 +60,52 @@ void getFPS()
 void getEyeRay(GLfloat m[16], GLfloat x, GLfloat y, GLfloat eye[3], GLfloat(&ray)[3])
 {
 	GLfloat tempV[4] = { x, y, 0, 1 };
-	//GLfloat solve[4];
-	//oglVectexMatrixMul(m, tempV, solve);
+	GLfloat solve[4];
+	oglVectexMatrixMul(m, tempV, solve);
 
-	//ray[0] = solve[0] - eye[0];
-	//ray[1] = solve[1] - eye[1];
-	//ray[2] = solve[2] - eye[2];
+	srand(timeNum);
+	GLfloat xrNum = 2*(rand() % 1000 / 1000.0)-1;
+	//timeNum += rand();
+	//std::cout << "xrNum" << xrNum << std::endl;
+	srand(timeNum);
+	GLfloat yrNum = 2*(rand() % 1000 / 1000.0)-1;
 
-	ray[0] = tempV[0] - eye[0];
-	ray[1] = tempV[1] - eye[1];
-	ray[2] = tempV[2] - eye[2];
+	ray[0] = solve[0] - eye[0]; //+ xrNum*0.01;
+	ray[1] = solve[1] - eye[1]; //+ yrNum*0.01;
+	ray[2] = solve[2] - eye[2]; //+ yrNum*0.01;
+
+	timeNum++;
+	//ray[2] = 0.5;
+
+	//ray[0] = tempV[0] - eye[0];
+	//ray[1] = tempV[1] - eye[1];
+	//ray[2] = tempV[2] - eye[2];
 }
 
 void getJitterMatrix(GLfloat(&m)[16])
 {
-	srand(time(NULL));
-	GLfloat xrNum = rand() % 1000 / 1000.0;
-	srand(time(NULL));
-	GLfloat yrNum = rand() % 1000 / 1000.0;
-	GLfloat v[3] = { xrNum * 2 - 1, yrNum * 2 - 1, 0 };
-	v[0] = v[0] / 512.0;
-	v[1] = v[1] / 512.0;
-	v[2] = v[2] / 512.0;
+	//srand(timeNum);
+	//GLfloat xrNum = rand() % 1000 / 1000.0;
+	//timeNum += rand();
+	//std::cout << "xrNum" << xrNum << std::endl;
+	//srand(timeNum);
+	//GLfloat yrNum = rand() % 1000 / 1000.0;
+	//timeNum += rand();
+	//std::cout << "yrNum" << yrNum << std::endl;
+	//GLfloat v[3] = { xrNum * 2 - 1, yrNum * 2 - 1, 0 };
+	//v[0] = v[0] / 512.0;
+	//v[1] = v[1] / 512.0;
+	//v[2] = v[2] / 512.0;
 
-	GLfloat tm[16];
-	oglTranslate(v, tm);
+	//GLfloat tm[16];
+	//oglTranslate(v, tm);
 
-	GLfloat tm2[16];
-	oglMatrixMul(tm, pvmMatrix, tm2);
+	//GLfloat tm2[16];
+	//oglMatrixMul(tm, pvmMatrix, tm2);
 
-	oglTranspositionMatrix(tm2, m);
+	//oglTranspositionMatrix(tm2, m);
+	oglTranspositionMatrix(pvmMatrix, m);
+	//timeNum++;
 }
 
 int main()
@@ -233,48 +250,108 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, bakeColorbuffer);
 		glUniform1i(glGetUniformLocation(pathTracingShader.program, "texture"), 0);
 
+		////generate model matrix
+		//GLfloat modelTM[16];
+		//GLfloat tv[3] = { 0, 0, 0 };
+		//oglTranslate(tv, modelTM);
+
+		//GLfloat modelRM[16];
+		//GLfloat axis[3] = { 0, 1, 0 };
+		//GLfloat theta = 0;
+		//oglRotateQuaternion(axis, theta, modelRM);
+
+		//GLfloat modelSM[16];
+		//GLfloat sv[3] = { 1, 1, 1 };
+		//oglScale(sv, modelSM);
+
+		//GLfloat modelMatric[16];
+		//oglModelMatrix(modelTM, modelRM, modelSM, modelMatric);
+		GLfloat modelTM[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+
+		////generate view matrix
+		//GLfloat viewTM[16];
+		//GLfloat(&vmt)[3] = camPosition;
+		//oglTranslate(vmt, viewTM);
+
+		//GLfloat viewRM[16];
+		//GLfloat &vmtheta = camYaw;
+		//GLfloat &vmthetaP = camPitch;
+		//oglRotateEuler(camYaw, camPitch, 0, viewRM);
+
+		//GLfloat viewMatric[16];
+		//oglViewMatrix(viewTM, viewRM, viewMatric);
+		GLfloat viewTM[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+
+		//generate Perspective matrix
+		GLfloat perspMatric[16];
+		GLfloat fov = 60;
+		GLfloat aspect = 1;
+		GLfloat nearPlane = 0.001;
+		GLfloat farPlane = 1000;
+
+		oglPerspectiveMatrix(fov, aspect, nearPlane, farPlane, perspMatric);
+		
+		for (int i = 0; i < 16; i++)
+		{
+			pvmMatrix[i] = perspMatric[i];
+		}
+
+
 		GLfloat eye[3] = { 0, 0, 0 };
 		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "eye"), 1, eye);
 
+		GLfloat light[3] = { 0.4, 0.5, -0.6 };
+		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "light"), 1, light);
+
 		glUniform1f(glGetUniformLocation(pathTracingShader.program, "glossiness"), 0);
 
-		//ray00 = getEyeRay(matrix, -1, -1);
 		GLfloat tm00[16];
 		GLfloat ray00[3];
 		getJitterMatrix(tm00);
+		//for (int i = 0; i < 16; i++)
+		//{
+		//	std::cout << tm00[i] << " ";
+		//}
+		//std::cout << std::endl;
 		getEyeRay(tm00, -1, -1, eye, ray00);
-		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "eye00"), 1, ray00);
+		//std::cout << "ray00: " << ray00[0] << ray00[1] << ray00[2] << std::endl;
+		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "ray00"), 1, ray00);
 
 		GLfloat tm01[16];
 		GLfloat ray01[3];
 		getJitterMatrix(tm01);
 		getEyeRay(tm01, -1, 1, eye, ray01);
-		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "eye01"), 1, ray01);
+		//std::cout << "ray01: " << ray01[0] << ray01[1] << ray01[2] << std::endl;
+		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "ray01"), 1, ray01);
 
 		GLfloat tm10[16];
 		GLfloat ray10[3];
 		getJitterMatrix(tm10);
 		getEyeRay(tm01, 1, -1, eye, ray10);
-		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "eye10"), 1, ray10);
+		//std::cout << "ray10: " << ray10[0] << ray10[1] << ray10[2] << std::endl;
+		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "ray10"), 1, ray10);
 
 		GLfloat tm11[16];
 		GLfloat ray11[3];
 		getJitterMatrix(tm11);
 		getEyeRay(tm01, 1, 1, eye, ray11);
-		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "eye11"), 1, ray11);
+		//std::cout << "ray11: " << ray11[0] << ray11[1] << ray11[2] << std::endl;
+		glUniform3fv(glGetUniformLocation(pathTracingShader.program, "ray11"), 1, ray11);
 
 		float textureWeight = sampleCount / (sampleCount + 1);
 		//std::cout << "textureWeight: " << textureWeight<<std::endl;
 		glUniform1f(glGetUniformLocation(pathTracingShader.program, "textureWeight"), textureWeight);
 
-		glUniform1f(glGetUniformLocation(pathTracingShader.program, "timeSinceStart"), 0.001);
+		GLfloat timeSinceStart = timeNum*0.001;
+		glUniform1f(glGetUniformLocation(pathTracingShader.program, "timeSinceStart"), timeSinceStart);
 
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
 		glBindTexture(GL_TEXTURE_2D, bakeColorbuffer);
-		glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, 512, 512);
+		//glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, 512, 512);
+		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 0, 0, 512, 512, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 
@@ -319,8 +396,8 @@ int main()
 		//oglTranslate(vmt, viewTM);
 
 		//GLfloat viewRM[16];
-	 //   GLfloat &vmtheta = camYaw;
-  //      GLfloat &vmthetaP = camPitch;
+		//GLfloat &vmtheta = camYaw;
+		//GLfloat &vmthetaP = camPitch;
 		//oglRotateEuler(camYaw, camPitch,0, viewRM);
 
 		//GLfloat viewMatric[16];
@@ -356,7 +433,7 @@ int main()
 		postShader.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-		//glBindTexture(GL_TEXTURE_2D, baseTexture.texture);
+		//glBindTexture(GL_TEXTURE_2D, bakeColorbuffer);
 		glUniform1i(glGetUniformLocation(postShader.program, "screenTexture"), 0);
 		//glUniform1f(glGetUniformLocation(postShader.program, "exposure"), 1);
 

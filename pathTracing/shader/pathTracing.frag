@@ -167,9 +167,10 @@ vec3 calculateColor(vec3 origin, vec3 ray, vec3 light) {
 void main() {
    vec3 newLight = light + uniformlyRandomVector(timeSinceStart - 53.0) * 0.1;
    vec3 texture = texture2D(texture, gl_FragCoord.xy / 512.0).rgb;
+   //vec4 tempColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, textureWeight), 1.0);
    gl_FragColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, textureWeight), 1.0);
    //gl_FragColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, 0.2), 1.0);
-   //gl_FragColor = vec4(calculateColor(eye, initialRay, newLight), 1.0);
+   //gl_FragColor = vec4(texture, 1.0);
 }
 
 
