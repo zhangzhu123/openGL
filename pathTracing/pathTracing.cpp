@@ -12,6 +12,7 @@
 #include "oglModel.h"
 #include "oglMath.h"
 
+//tst
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void Do_Movement();
